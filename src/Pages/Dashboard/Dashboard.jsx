@@ -16,6 +16,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 import { Link, Outlet } from 'react-router-dom';
 import HomeIcon from '../../Components/Icons';
@@ -122,10 +123,22 @@ export default function Dashboard() {
         <Divider />
         <List>
           
-            <Link  to='makeadmin'><ListItem >
+            <Link  to='/'><ListItem >
               <ListItemButton>
                 <ListItemIcon>
                 <HomeIcon/>
+                </ListItemIcon>
+                <ListItemText primary={"Home"} />
+              </ListItemButton>
+            </ListItem></Link>
+      
+        </List>
+        <List>
+          
+            <Link  to='makeadmin'><ListItem >
+            <ListItemButton>
+                <ListItemIcon>
+                <AccountCircleIcon/>
                 </ListItemIcon>
                 <ListItemText primary={"Make Admin"} />
               </ListItemButton>

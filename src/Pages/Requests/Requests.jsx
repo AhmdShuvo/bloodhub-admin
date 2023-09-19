@@ -1,42 +1,129 @@
 
+import { Box, Button, } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import { useEffect, useState } from 'react';
 
-const columns = [
-  { field: 'id', headerName: 'ID', width: 70 },
-  { field: 'firstName', headerName: 'First name', width: 130 },
-  { field: 'lastName', headerName: 'Last name', width: 130 },
-  {
-    field: 'age',
-    headerName: 'Age',
-    type: 'number',
-    width: 90,
-  },
-  {
-    field: 'fullName',
-    headerName: 'Full name',
-    description: 'This column has a value getter and is not sortable.',
-    sortable: false,
-    width: 160,
-    valueGetter: (params) =>
-      `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-  },
-];
+  async function  approve(id,name,donor){
 
-const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-];
+ const istrue= confirm(`Sure Want to Accept ${name} ? `)
+istrue&&
+fetch(`https://bloodhub-server-api.onrender.com/status/donor/${id}`, {
+  method: 'PUT',
+  headers: {
+    'content-type': 'application/json',
+  },
+  body: JSON.stringify(donor),
+})
+  .then((res) => res.json())
+  .then((data) => {
+    if (data.modifiedCount > 0) {
+      console.log('data');
+    }
+   
+  });
+}
+
+
 
 export default function Requests() {
+  const [users,setusers]=useState([])
+  const [request,setRequests]=useState([])
+  const delelete = (id,name) => {
+
+    const proceed = window.confirm(`Are you sure you want to delete ${name}? `);
+    if (proceed === true) {
+      const url = `https://bloodhub-server-api.onrender.com/donor/delete/${id}`;
+      fetch(url, {
+        method: 'DELETE',
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.deletedCount) {
+  
+            
+            setTimeout(() => {
+              
+            }, 5000);
+            const remaining = request.filter((event) => event._id !== id);
+            setRequests(remaining)
+          }
+        });
+    }
+  };
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 100 },
+    {
+      field: 'displayName',
+      headerName: 'Full name',
+      description: 'This column has a value getter and is not sortable.',
+      sortable: false,
+     
+     
+    },
+    {
+     field:"Approve",
+     renderCell:(params)=>{
+      return (
+        <>
+   <Button  onClick={()=>approve(params.id,params.row.displayName,params.row)} variant="contained" color="success">
+    Accept
+  </Button> 
+  
+   </>
+      )
+     } ,
+     
+    },
+    {
+      field:"Reject",
+      headerName:'Reject',
+      renderCell:(params)=>{
+       return (
+         <>
+    
+   <Button  onClick={()=>delelete(params.id,params.row.displayName,params.row)} variant="outlined" color="error">
+     Delete 
+   </Button>
+    </>
+       )
+      } ,
+    
+     },
+    {
+      field:'address',headerName:'Address',
+     
+    },
+    {
+      field: 'group',
+      headerName: 'Group',
+      
+    },
+    { field: 'status', headerName: 'STATUS', width: 100 },
+   
+  ];
+
+  useEffect(()=>{
+    fetch('https://bloodhub-server-api.onrender.com/donors').then(res=>res.json()).then(data=>setusers(data.reverse()));
+    const activeItems = users.filter((item) => item.status !== "Active");
+        setRequests(activeItems);
+  },[users])
+
+  const rows=request.map((row)=>({
+    id:row._id,
+    displayName:row.displayName,
+    age:row.phone,
+    group:row.group,
+    address:row.address,
+    status:row.status
+
+  }))
+
+ 
+  
+ 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <Box  >
       <DataGrid
         rows={rows}
         columns={columns}
@@ -46,8 +133,11 @@ export default function Requests() {
           },
         }}
         pageSizeOptions={[5, 10]}
-        checkboxSelection
+        
       />
-    </div>
+     
+    </Box>
   );
 }
+
+
